@@ -85,22 +85,20 @@ void MainSensorMeasure(void){
   if( distance < 15 && distance > 0)
   {
     Stop(); // stop any moving
-    Serial.print(Speed);
+    Backward();
+    delay(200);
+    Stop();
     Serial.print("Main sensor triggered");
     Serial.print("Distance_one: ");
     Serial.print(distance);
     Serial.println(" cm");
-    Backward(); //move backward
-    delay(300);
-    Stop();
-    SecondarySensorMeasure(true);
-    delay(50);
+    SecondarySensorMeasure();
   }else{
     Forward(); 
     }
 }
 
-void SecondarySensorMeasure(bool additional_measurement){
+void SecondarySensorMeasure(){
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -109,32 +107,37 @@ void SecondarySensorMeasure(bool additional_measurement){
   duration_two = pulseIn(echoPin, HIGH);
   distance_two = duration_two * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
   
-  if( distance_two < 15 && distance_two > 0)
+  if( distance_two < 20 && distance_two > 0)
   {
    Serial.print("Second Measurement: Obstacle Detection");
    Serial.print("Distance_two: ");
    Serial.print(distance_two);
    Serial.println(" cm");
-   TurnLeft();
-   delay(600);
-   Stop();
+   AdditionalSensorMeasure();
   }
-  else if(additional_measurement == true){
-   TurnRight();
-   delay(600);
-   Stop();
-    }
 }
 
 void AdditionalSensorMeasure(void){
- distance_three = analogRead(A5);
-  //Serial.print(analogRead(A5));
-  if( distance_three < 10 && distance_three > 0)
+  digitalWrite(trigPin_three, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin_three, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin_three, LOW);
+  duration_three = pulseIn(echoPin_three, HIGH);
+  distance_three = duration_three * 0.034 / 2;
+  if( distance_three < 15 && distance_three > 0)
   {
   Serial.print("Additional measurement obstacle detection ");
   Serial.print("Distance_three: ");
   Serial.print(distance_three);
   Serial.println(" cm");
+  TurnRight();
+   delay(600);
+   Stop();
+  }else{
+  TurnLeft();
+   delay(600);
+   Stop();
   }
 }
 
@@ -206,8 +209,9 @@ void loop() {
     }
    }
   }else{//autopilot on, autonomous functionality enabled
-    Speed = 128;
+    Speed = 200;
     MainSensorMeasure();
-    SecondarySensorMeasure(false);
+    SecondarySensorMeasure();
+    
   }
 }// end of main loop
