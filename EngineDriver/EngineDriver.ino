@@ -74,6 +74,36 @@ void Stop(void){
 }
 
 void MainSensorMeasure(void){
+  
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration_two = pulseIn(echoPin, HIGH);
+  distance_two = duration_two * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
+
+  
+  if( distance_two < 35 && distance_two > 0)
+    {
+     TurnLeft();
+     delay(300);
+    }
+
+  digitalWrite(trigPin_three, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin_three, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin_three, LOW);
+  duration_three = pulseIn(echoPin_three, HIGH);
+  distance_three = duration_three * 0.034 / 2;
+  
+   if(distance_three < 35 && distance_three > 0)
+    {
+     TurnRight();
+     delay(300);
+    }
+    
   digitalWrite(trigPin_two, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin_two, HIGH);
@@ -81,21 +111,23 @@ void MainSensorMeasure(void){
   digitalWrite(trigPin_two, LOW);
   duration = pulseIn(echoPin_two, HIGH);
   distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
-
-  if( distance < 15 && distance > 0)
+  if( distance < 20 && distance > 0)
   {
     Stop(); // stop any moving
     Backward();
-    delay(200);
+    delay(500);
+    TurnRight();
+    delay(500);
     Stop();
     Serial.print("Main sensor triggered");
     Serial.print("Distance_one: ");
     Serial.print(distance);
     Serial.println(" cm");
-    SecondarySensorMeasure();
+    //SecondarySensorMeasure();
   }else{
     Forward(); 
-    }
+    
+   }
 }
 
 void SecondarySensorMeasure(){
@@ -125,18 +157,21 @@ void AdditionalSensorMeasure(void){
   digitalWrite(trigPin_three, LOW);
   duration_three = pulseIn(echoPin_three, HIGH);
   distance_three = duration_three * 0.034 / 2;
-  if( distance_three < 15 && distance_three > 0)
+  if( distance_three < 20 && distance_three > 0)
   {
   Serial.print("Additional measurement obstacle detection ");
   Serial.print("Distance_three: ");
   Serial.print(distance_three);
   Serial.println(" cm");
-  TurnRight();
-   delay(600);
+  Backward();
+    delay(150);
+    Stop();
+  TurnLeft();
+   delay(500);
    Stop();
   }else{
-  TurnLeft();
-   delay(600);
+   TurnLeft();
+   delay(300);
    Stop();
   }
 }
@@ -168,9 +203,9 @@ void setup() {
 }
  
 void loop() {
-  Stop();
   bool autopilot = digitalRead(A5);
   if(autopilot == false){ //autopilot off, manually controlled
+    Stop();
     unsigned short int val = analogRead(A0);
     val = val /4;
     // Serial.println(val,DEC); //Prints as decimal, with line feed
@@ -209,9 +244,8 @@ void loop() {
     }
    }
   }else{//autopilot on, autonomous functionality enabled
-    Speed = 200;
+    Speed = 150;
     MainSensorMeasure();
-    SecondarySensorMeasure();
     
   }
 }// end of main loop
